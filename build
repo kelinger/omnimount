@@ -1,0 +1,3 @@
+# Grab latest from https://github.com/trapexit/mergerfs
+# Rename it to mergerfs
+docker build -t kelinger/omnimount:latest .

@@ -1,0 +1,81 @@
+#!/bin/bash
+OPTION=${1}
+
+while true; do
+	echo " ${LBLUE}"
+	RAW=$(rclone rc core/stats)
+	JRAW=$(rclone rc job/list)
+	SDATE=$(date -d "-$(echo ${RAW} | jq '.elapsedTime') seconds" '+%F %H:%M:%S')
+	GIG=$(echo ${RAW} | jq '.bytes /1024/1024/1024')
+	CHECK=$(echo ${RAW} | jq .checks)
+	DEL=$(echo ${RAW} | jq .deletes)
+	ERR=$(echo ${RAW} | jq .errors)
+	FT=$(echo ${RAW} | jq .transfers)
+
+	TRANSFERS=$(echo ${RAW} | jq .transferring | jq length)
+	SIZE=$(echo ${RAW} | jq '[.transferring[].size]' | jq 'add /1024/1024/1024')
+	SPEED=$(echo ${RAW} | jq '[.transferring[].speed]' | jq 'add /1024/1024')
+	FILES=$(echo ${RAW} | jq '[ .transferring[] | {name: .name, percent: .percentage} ]')
+	#QSIZE=$(echo ${JRAW} | jq .jobids | jq length)
+
+	clear
+	echo Rclone Since Startup
+	echo -----------------------------------------
+	#echo 'Startup Time      : '${SDATE}
+	echo -n 'Data transferred  : '
+	printf "%'.2f" ${GIG}
+	echo ' GB'
+	echo -n 'Files transferred : '
+	printf "%'d\n" ${FT}
+	echo -n 'Checks completed  : '
+	printf "%'d\n" ${CHECK}
+	echo -n 'Deletes performed : '
+	printf "%'d\n" ${DEL}
+	echo -n 'Errors occurred   : '
+	printf "%'d\n" ${ERR}
+	echo
+	echo Rclone Real Time
+	echo -----------------------------------------
+	#echo -n 'TurboSync jobs    : '
+	#printf "%'d\n" ${QSIZE}
+	echo -n 'Files in motion   : '
+	printf "%'d\n" ${TRANSFERS}
+	echo -n 'Size of files     : '
+	printf "%'.2f" ${SIZE}
+	echo ' GB'
+	echo -n 'Current speed     : '
+	printf "%'.2f" ${SPEED}
+	echo ' MB/sec'
+	echo
+	if [[ ${OPTION,,} != "short" && ${TRANSFERS} != 0 ]]; then
+		echo 'Files transferring:'
+		echo
+		for ((x=0; x<${TRANSFERS}; x++))
+		do
+			percent=$(echo ${RAW} | jq ".transferring[${x}] .percentage")
+			name=$(echo ${RAW} | jq ".transferring[${x}] .name")
+			name=$(basename "${name}")
+			if [[ ${percent} -lt 100 ]]
+			then
+				percent=" ${percent}"
+			fi
+			if [[ ${percent} -lt 10 ]]
+			then
+				percent=" ${percent}"
+			fi
+			echo  "${percent}% ${name//\"}" >> /tmp/xfer-${$}
+		done
+		cat /tmp/xfer-${$} | sort -n
+		rm /tmp/xfer-${$}
+	fi
+	echo
+	echo -n " ${WHITE}Q${STD} - QUIT"
+	echo -n " ${LBLUE}"
+	sleep 1
+
+	read -t 0.25 -N 1 input
+	if [[ ${input} = "q" ]] || [[ ${input} = "Q" ]]; then
+		echo
+		break
+	fi
+done

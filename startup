@@ -1,0 +1,78 @@
+#!/usr/bin/env bash
+
+function cleanup {
+	echo Received request to shutdown
+	fusermount -uz /mnt/${MERGEMOUNT} /mnt/${RCLONEMOUNT} > /dev/null
+	umount /mnt/${MERGEMOUNT} /mnt/${RCLONEMOUNT} > /dev/null
+	rmdir /mnt/${MERGEMOUNT} /mnt/${RCLONEMOUNT} /mnt/${UNSYNCED} /mnt/${UPLOADCACHE} > /dev/null
+}
+
+rclone selfupdate > /dev/null 2>&1	# Grab a newer Rclone if container hasn't been updated
+rclone --version
+echo
+mergerfs -v
+echo
+echo Starting vnstat
+vnstatd -d
+#
+# Make sure we're only using the basename of the path for direcory creation
+#
+MERGEMOUNT=$(basename ${MERGEMOUNT})
+RCLONEMOUNT=$(basename ${RCLONEMOUNT})
+UNSYNCED=$(basename ${UNSYNCED})
+UPLOADCACHE=$(basename ${UPLOADCACHE})
+MEDIA=$(basename ${MEDIA})
+echo
+echo Configuration:
+echo MERGEMOUNT=${MERGEMOUNT}
+echo RCLONESERVICE=${RCLONESERVICE}
+echo RCLONEMOUNT=${RCLONEMOUNT}
+echo UNSYNCED=${UNSYNCED}
+echo UPLOADCACHE=${UPLOADCACHE}
+echo MEDIA=${MEDIA}
+echo TURBOMAX=${TURBOMAX}
+if [[ -z ${MERGEMOUNT} || -z ${RCLONESERVICE} || -z ${RCLONEMOUNT} || -z ${UNSYNCED} || -z ${UPLOADCACHE} ]]; then
+	echo One or more critical environment variables left undefined.
+	exit 1
+fi
+#
+# Create user to match prescribed userID
+#
+addgroup --gid ${GROUPID} omniuser
+adduser --uid ${USERID} --gid ${GROUPID} --gecos "" --disabled-password omniuser
+
+#
+# Clean any leftovers
+#
+fusermount -uz /mnt/${MERGEMOUNT} > /dev/null 2>&1
+umount -f /mnt/${MERGEMOUNT} > /dev/null 2>&1
+fusermount -uz /mnt/${RCLONEMOUNT} > /dev/null 2>&1
+umount -f /mnt/${RCLONEMOUNT} > /dev/null 2>&1
+rm -r /mnt/${MERGEMOUNT} > /dev/null 2>&1
+rmdir /mnt/${RCLONEMOUNT} > /dev/null 2>&1
+
+mkdir -p /mnt/${MERGEMOUNT} /mnt/${RCLONEMOUNT} /mnt/${UNSYNCED} /mnt/${UPLOADCACHE}/Downloads /logs
+chown -R ${USERID}:${GROUPID} /mnt /config
+echo Starting services
+/root/omni-rclone
+/root/omni-merger
+echo
+echo Startup complpete
+
+trap cleanup EXIT INT
+
+while true; do
+	sleep 1
+done
+exit
+while $(mountpoint -q /mnt/${RCLONEMOUNT}) && $(mountpoint -q /mnt/${MERGEMOUNT}); do
+	# keep alive while Rclone and MergerFS mounts are present
+	sleep 1
+done
+
+echo One or more mounts missing
+fusermount -uz /mnt/${MERGEMOUNT} > /dev/null 2>&1
+umount -f /mnt/${MERGEMOUNT} > /dev/null 2>&1
+fusermount -uz /mnt/${RCLONEMOUNT} > /dev/null 2>&1
+umount -f /mnt/${RCLONEMOUNT} > /dev/null 2>&1
+echo Terminated
