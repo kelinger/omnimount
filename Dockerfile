@@ -20,7 +20,7 @@ ENV TURBOMAX=20
 
 # Install additional files
 
-RUN apt update &&  apt install curl procps fuse3 jq vnstat unzip -y &&  apt upgrade -y &&  sed -i 's/^#user_allow_other/user_allow_other/g' /etc/fuse.conf &&  sed -i 's/^DatabaseDir \"\/var\/lib\/vnstat\"/DatabaseDir=\"\/config\"/g' /etc/vnstat.conf
+RUN apt update &&  apt install curl procps fuse3 jq nfs-common vnstat unzip -y &&  apt upgrade -y &&  sed -i 's/^#user_allow_other/user_allow_other/g' /etc/fuse.conf &&  sed -i 's/^DatabaseDir \"\/var\/lib\/vnstat\"/DatabaseDir=\"\/config\"/g' /etc/vnstat.conf
 
 # Install Rclone from repository
 
