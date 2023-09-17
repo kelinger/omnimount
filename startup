@@ -3,8 +3,9 @@
 function cleanup {
 	echo Received request to shutdown
 	fusermount -uz /mnt/${MERGEMOUNT} /mnt/${RCLONEMOUNT} > /dev/null
-	umount /mnt/${MERGEMOUNT} /mnt/${RCLONEMOUNT} > /dev/null
-	rmdir /mnt/${MERGEMOUNT} /mnt/${RCLONEMOUNT} /mnt/${UNSYNCED} /mnt/${UPLOADCACHE} > /dev/null
+	umount /mnt/${MERGEMOUNT} /mnt/${RCLONEMOUNT} /mnt/${NFSLOCAL} > /dev/null
+	rmdir /mnt/${MERGEMOUNT} /mnt/${RCLONEMOUNT} /mnt/${UNSYNCED} /mnt/${UPLOADCACHE} /mnt/${NFSLOCAL} > /dev/null
+	exit
 }
 
 rclone selfupdate > /dev/null 2>&1	# Grab a newer Rclone if container hasn't been updated
@@ -29,6 +30,7 @@ echo RCLONESERVICE=${RCLONESERVICE}
 echo RCLONEMOUNT=${RCLONEMOUNT}
 echo UNSYNCED=${UNSYNCED}
 echo UPLOADCACHE=${UPLOADCACHE}
+echo USENFS=${USENFS}
 echo NFSREMOTE=${NFSREMOTE}
 echo NFSLOCAL=${NFSLOCAL}
 echo MEDIA=${MEDIA}
@@ -45,22 +47,28 @@ adduser --uid ${USERID} --gid ${GROUPID} --gecos "" --disabled-password omniuser
 
 # Clean any leftovers
 
+echo Cleaning up leftovers
 fusermount -uz /mnt/${MERGEMOUNT} > /dev/null 2>&1
 umount -f /mnt/${MERGEMOUNT} > /dev/null 2>&1
 fusermount -uz /mnt/${RCLONEMOUNT} > /dev/null 2>&1
 umount -f /mnt/${RCLONEMOUNT} > /dev/null 2>&1
+umount -f /mnt/${NFSLOCAL} > /dev/null 2>&1
 rm -r /mnt/${MERGEMOUNT} > /dev/null 2>&1
 rmdir /mnt/${RCLONEMOUNT} > /dev/null 2>&1
-
 mkdir -p /mnt/${MERGEMOUNT} /mnt/${RCLONEMOUNT} /mnt/${UNSYNCED} /mnt/${UPLOADCACHE}/Downloads /logs
 chown -R ${USERID}:${GROUPID} /mnt /config
 echo Starting services
 /root/omni-mounter
+if [[ ${?} -ne 0 ]]
+then
+	echo Mounter failed
+	exit 1
+fi
 /root/omni-merger
 echo
 echo Startup complpete
 
-trap cleanup EXIT INT
+trap cleanup SIGKILL SIGTERM SIGHUP SIGINT EXIT
 
 while true; do
 	sleep 1
@@ -76,4 +84,5 @@ fusermount -uz /mnt/${MERGEMOUNT} > /dev/null 2>&1
 umount -f /mnt/${MERGEMOUNT} > /dev/null 2>&1
 fusermount -uz /mnt/${RCLONEMOUNT} > /dev/null 2>&1
 umount -f /mnt/${RCLONEMOUNT} > /dev/null 2>&1
+umount -f /mnt/${NFSLOCAL} > /dev/null 2>&1
 echo Terminated

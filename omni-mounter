@@ -19,9 +19,12 @@ echo VFSREAD=${VFSREAD}
 echo VFSCACHE=${VFSCACHE}
 echo DIRCACHE=${DIRCACHE}
 
-if [[ -z ${NFSREMOTE} || -z ${NFSLOCAL} ]]
+if [[ ! ${USENFS} = "true" ]]
 then
-	echo NFS Disabled - unset variables
+
+# Not using NFS
+
+	echo NFS Disabled
 	if [[ ${VFSCACHE} = "yes" ]]
 	then
 		echo OmniMount Caching:  enabled
@@ -71,4 +74,20 @@ then
 
 	/usr/bin/rclone rc vfs/refresh recursive=true _async=true
 	touch /mnt/${RCLONEMOUNT}/$(basename ${MEDIA})/omnimounted
+else
+
+# Using NFS
+
+	if [[ -z ${NFSREMOTE} || -z ${NFSLOCAL} ]]
+	then
+		# At least one variable empty so abort
+		echo Attempting to use NFS but NFSREMOTE and NFSLOCAL variables are not set correctly
+		exit 1
+	fi
+	# Mount NFS
+	mkdir -p /mnt/${NFSLOCAL}
+	chown -R ${USERID}:${GROUPID} /mnt/${NFSLOCAL}
+	rmdir /mnt/${RCLONEMOUNT}
+	mount ${NFSREMOTE} /mnt/${NFSLOCAL}
+	touch /mnt/${NFSLOCAL}/$(basename ${MEDIA})/omnimounted
 fi
