@@ -89,5 +89,6 @@ else
 	chown -R ${USERID}:${GROUPID} /mnt/${NFSLOCAL}
 	rmdir /mnt/${RCLONEMOUNT}
 	mount ${NFSREMOTE} /mnt/${NFSLOCAL}
+	rclone rcd --rc-no-auth --user-agent omnimount &
 	touch /mnt/${NFSLOCAL}/$(basename ${MEDIA})/omnimounted
 fi
