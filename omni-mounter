@@ -19,52 +19,56 @@ echo VFSREAD=${VFSREAD}
 echo VFSCACHE=${VFSCACHE}
 echo DIRCACHE=${DIRCACHE}
 
-if [[ ${VFSCACHE} = "yes" ]]
+if [[ -z ${NFSREMOTE} || -z ${NFSLOCAL} ]]
 then
-	echo OmniMount Caching:  enabled
-	/usr/bin/rclone mount \
-		--allow-other \
-		--cache-dir=/tmp/cache \
-		--dir-cache-time ${DIRCACHE} \
-		--gid ${USERID} \
-		--uid ${GROUPID} \
-		--log-level WARNING \
-        	--log-file /logs/rclone.log \
-		--poll-interval 10s \
-		--rc \
-		--rc-no-auth \
-		--umask 000 \
-		--user-agent omnimount \
-		--drive-pacer-min-sleep 10ms \
-		--drive-pacer-burst 200 \
-		--vfs-cache-mode full \
-		--vfs-cache-max-size ${VFSMAX} \
-		--vfs-cache-max-age ${VFSAGE} \
-		--vfs-cache-poll-interval ${VFSPOLL} \
-		--vfs-read-ahead ${VFSREAD} \
-		--config /config/rclone.conf \
-        	${RCLONESERVICE}:/ /mnt/${RCLONEMOUNT} &
-else
-	echo OmniMount Caching:  disabled
-	/usr/bin/rclone mount \
-		--allow-other \
-		--dir-cache-time ${DIRCACHE} \
-		--gid ${USERID} \
-		--uid ${GROUPID} \
-		--log-level WARNING \
-        	--log-file /logs/rclone.log \
-		--poll-interval 10s \
-		--rc \
-		--rc-no-auth \
-		--umask 000 \
-		--user-agent omnimount \
-		--drive-pacer-min-sleep 10ms \
-		--drive-pacer-burst 200 \
-		--vfs-cache-mode off \
-		--config /config/rclone.conf \
-        	${RCLONESERVICE}:/ /mnt/${RCLONEMOUNT} &
-fi
-sleep 5
+	echo NFS Disabled - unset variables
+	if [[ ${VFSCACHE} = "yes" ]]
+	then
+		echo OmniMount Caching:  enabled
+		/usr/bin/rclone mount \
+			--allow-other \
+			--cache-dir=/tmp/cache \
+			--dir-cache-time ${DIRCACHE} \
+			--gid ${USERID} \
+			--uid ${GROUPID} \
+			--log-level WARNING \
+        		--log-file /logs/rclone.log \
+			--poll-interval 10s \
+			--rc \
+			--rc-no-auth \
+			--umask 000 \
+			--user-agent omnimount \
+			--drive-pacer-min-sleep 10ms \
+			--drive-pacer-burst 200 \
+			--vfs-cache-mode full \
+			--vfs-cache-max-size ${VFSMAX} \
+			--vfs-cache-max-age ${VFSAGE} \
+			--vfs-cache-poll-interval ${VFSPOLL} \
+			--vfs-read-ahead ${VFSREAD} \
+			--config /config/rclone.conf \
+        		${RCLONESERVICE}:/ /mnt/${RCLONEMOUNT} &
+	else
+		echo OmniMount Caching:  disabled
+		/usr/bin/rclone mount \
+			--allow-other \
+			--dir-cache-time ${DIRCACHE} \
+			--gid ${USERID} \
+			--uid ${GROUPID} \
+			--log-level WARNING \
+        		--log-file /logs/rclone.log \
+			--poll-interval 10s \
+			--rc \
+			--rc-no-auth \
+			--umask 000 \
+			--user-agent omnimount \
+			--drive-pacer-min-sleep 10ms \
+			--drive-pacer-burst 200 \
+			--vfs-cache-mode off \
+			--config /config/rclone.conf \
+        		${RCLONESERVICE}:/ /mnt/${RCLONEMOUNT} &
+	fi
+	sleep 5
 
-/usr/bin/rclone rc vfs/refresh recursive=true _async=true
-touch /mnt/${RCLONEMOUNT}/$(basename ${MEDIA})/omnimounted
+	/usr/bin/rclone rc vfs/refresh recursive=true _async=true
+	touch /mnt/${RCLONEMOUNT}/$(basename ${MEDIA})/omnimounted
+fi
