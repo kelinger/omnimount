@@ -14,9 +14,9 @@ mergerfs -v
 echo
 echo Starting vnstat
 vnstatd -d
-#
+
 # Make sure we're only using the basename of the path for direcory creation
-#
+
 MERGEMOUNT=$(basename ${MERGEMOUNT})
 RCLONEMOUNT=$(basename ${RCLONEMOUNT})
 UNSYNCED=$(basename ${UNSYNCED})
@@ -29,21 +29,21 @@ echo RCLONESERVICE=${RCLONESERVICE}
 echo RCLONEMOUNT=${RCLONEMOUNT}
 echo UNSYNCED=${UNSYNCED}
 echo UPLOADCACHE=${UPLOADCACHE}
+echo NFS=${NFS}
 echo MEDIA=${MEDIA}
 echo TURBOMAX=${TURBOMAX}
 if [[ -z ${MERGEMOUNT} || -z ${RCLONESERVICE} || -z ${RCLONEMOUNT} || -z ${UNSYNCED} || -z ${UPLOADCACHE} ]]; then
 	echo One or more critical environment variables left undefined.
 	exit 1
 fi
-#
+
 # Create user to match prescribed userID
-#
+
 addgroup --gid ${GROUPID} omniuser
 adduser --uid ${USERID} --gid ${GROUPID} --gecos "" --disabled-password omniuser
 
-#
 # Clean any leftovers
-#
+
 fusermount -uz /mnt/${MERGEMOUNT} > /dev/null 2>&1
 umount -f /mnt/${MERGEMOUNT} > /dev/null 2>&1
 fusermount -uz /mnt/${RCLONEMOUNT} > /dev/null 2>&1
@@ -54,7 +54,7 @@ rmdir /mnt/${RCLONEMOUNT} > /dev/null 2>&1
 mkdir -p /mnt/${MERGEMOUNT} /mnt/${RCLONEMOUNT} /mnt/${UNSYNCED} /mnt/${UPLOADCACHE}/Downloads /logs
 chown -R ${USERID}:${GROUPID} /mnt /config
 echo Starting services
-/root/omni-rclone
+/root/omni-mounter
 /root/omni-merger
 echo
 echo Startup complpete

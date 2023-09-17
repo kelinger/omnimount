@@ -13,7 +13,7 @@ VOLUME /mnt
 ENV USERID=1000
 ENV UNSYNCED=Cache
 ENV UPLOADCACHE=UploadCache
-ENV DIRCACHE=96h
+ENV NFS=
 ENV MERGEMOUNT=Cloud
 ENV MEDIA=Media
 ENV TURBOMAX=20
@@ -28,7 +28,7 @@ RUN curl https://rclone.org/install.sh | bash
 
 # Bring in scripts and binaries
 
-COPY omni-rclone omni-merger rstats startup turbosync mergerfs.deb /root/
+COPY omni-mounter omni-merger rstats startup turbosync mergerfs.deb /root/
 WORKDIR /root
 
 # Install MergerFS
