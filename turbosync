@@ -48,12 +48,20 @@ if [[ -s ${TEMPFILE} ]]; then
 			echo "$(date '+%F %H:%M:%S')",START,1,"${BYTES}" "# /${FILE}" >>"${APILOG}"
 			echo Queuing "/${FILE}" of size "${BYTESH}"
 			## Fix for Rclone RC creating multiple directories
-			TESTDIR="${RCLONEMOUNT}$(dirname "/${FILE}")"
-			if [[ ! -d "${TESTDIR}" ]]; then
-				echo Making "${TESTDIR}"
-				mkdir -p "${TESTDIR}"
+			#TESTDIR="${RCLONEMOUNT}$(dirname "/${FILE}")"
+			#echo $TESTDIR
+			#if [[ ! -d "${TESTDIR}" ]]; then
+				#echo Making "${TESTDIR}"
+				#mkdir -p "${TESTDIR}"
+			#fi
+			if [[ ! ${USENFS} = true ]]
+			then
+				# Not using NFS so use rclone move
+				rclone rc operations/movefile _async=true srcFs=/ srcRemote="${UPLOADCACHE}/${FILE}" dstFs="${RCLONESERVICE}": dstRemote="${FILE}"
+			else
+				# Using NFS so use local copy (via rclone rc)
+				rclone rc operations/movefile _async=true srcFs=/ srcRemote="${UPLOADCACHE}/${FILE}" dstFs=/ dstRemote="/mnt/${NFSLOCAL}/${FILE}"
 			fi
-			rclone rc operations/movefile _async=true srcFs=/ srcRemote="${UPLOADCACHE}/${FILE}" dstFs="${RCLONESERVICE}": dstRemote="${FILE}"
 			COUNTER=$(( ${COUNTER} +1 ))
 		else
 			echo Skipping "${FILE}": Already in queue
