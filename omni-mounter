@@ -25,6 +25,8 @@ then
 # Not using NFS
 
 	echo NFS Disabled
+	mkdir -p /mnt/${RCLONEMOUNT}
+	echo mkdir -p /mnt/${RCLONEMOUNT}
 	if [[ ${VFSCACHE} = "yes" ]]
 	then
 		echo OmniMount Caching:  enabled
@@ -78,6 +80,7 @@ else
 
 # Using NFS
 
+	echo NFS enabled
 	if [[ -z ${NFSREMOTE} || -z ${NFSLOCAL} ]]
 	then
 		# At least one variable empty so abort

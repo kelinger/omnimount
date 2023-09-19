@@ -6,5 +6,5 @@ if [[ ${USENFS} = "true" ]]
 then
 	MOUNTLOC=${NFSLOCAL}
 fi
-	
+
 /usr/bin/mergerfs /mnt/${UPLOADCACHE}:/mnt/${UNSYNCED}:/mnt/${MOUNTLOC} /mnt/${MERGEMOUNT} -o rw,use_ino,allow_other,func.getattr=newest,category.action=all,category.create=ff,cache.files=partial,dropcacheonclose=true &
