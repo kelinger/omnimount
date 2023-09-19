@@ -68,7 +68,7 @@ then
 			--user-agent omnimount \
 			--drive-pacer-min-sleep 10ms \
 			--drive-pacer-burst 200 \
-			--vfs-cache-mode off \
+			--vfs-cache-mode writes \
 			--config /config/rclone.conf \
         		${RCLONESERVICE}:/ /mnt/${RCLONEMOUNT} &
 	fi
