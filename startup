@@ -2,15 +2,15 @@
 
 function cleanup {
 	echo Received request to shutdown
-	fusermount -uz /mnt/${MERGEMOUNT} /mnt/${RCLONEMOUNT} > /dev/null
-	umount /mnt/${MERGEMOUNT} #> /dev/null
-	umount /mnt/${RCLONEMOUNT} #> /dev/null
-	umount /mnt/${NFSLOCAL} #> /dev/null
-	rmdir /mnt/${MERGEMOUNT} #> /dev/null
-	rmdir /mnt/${RCLONEMOUNT} #> /dev/null
-	rmdir /mnt/${UNSYNCED} #> /dev/null
-	rmdir /mnt/${UPLOADCACHE} #> /dev/null
-	rmdir /mnt/${NFSLOCAL} #> /dev/null
+	fusermount -uz /mnt/${MERGEMOUNT} /mnt/${RCLONEMOUNT} > /dev/null 2>&1
+	umount -f /mnt/${MERGEMOUNT} > /dev/null 2>&1
+	umount -f /mnt/${RCLONEMOUNT} > /dev/null 2>&1
+	umount -f /mnt/${NFSLOCAL} > /dev/null 2>&1
+	rmdir /mnt/${MERGEMOUNT} > /dev/null 2>&1
+	rmdir /mnt/${RCLONEMOUNT} > /dev/null 2>&1
+	rmdir /mnt/${UNSYNCED} > /dev/null 2>&1
+	rmdir /mnt/${UPLOADCACHE} > /dev/null 2>&1
+	rmdir /mnt/${NFSLOCAL} > /dev/null 2>&1
 	exit
 }
 
@@ -62,12 +62,13 @@ adduser --uid ${USERID} --gid ${GROUPID} --gecos "" --disabled-password omniuser
 # Clean any leftovers
 
 echo Cleaning up leftovers
-fusermount -uz /mnt/${MERGEMOUNT} > /dev/null 2>&1
+fusermount -uz /mnt/${MERGEMOUNT} /mnt/${RCLONEMOUNT} > /dev/null 2>&1
 umount -f /mnt/${MERGEMOUNT} > /dev/null 2>&1
-fusermount -uz /mnt/${LOCAL} > /dev/null 2>&1
-umount -f /mnt/${LOCAL} > /dev/null 2>&1
+umount -f /mnt/${RCLONEMOUNT} > /dev/null 2>&1
+umount -f /mnt/${NFSLOCAL} > /dev/null 2>&1
 rm -r /mnt/${MERGEMOUNT} > /dev/null 2>&1
-rmdir /mnt/${LOCAL} > /dev/null 2>&1
+rm -r /mnt/${RCLONEMOUNT} > /dev/null 2>&1
+rm -r /mnt/${NFSLOCAL} > /dev/null 2>&1
 mkdir -p /mnt/${MERGEMOUNT} /mnt/${LOCAL} /mnt/${UNSYNCED} /mnt/${UPLOADCACHE}/Downloads /logs
 chown -R ${USERID}:${GROUPID} /mnt /config
 echo Starting services
@@ -93,8 +94,11 @@ while $(mountpoint -q /mnt/${LOCAL}) && $(mountpoint -q /mnt/${MERGEMOUNT}); do
 done
 
 echo One or more mounts missing
-fusermount -uz /mnt/${MERGEMOUNT} > /dev/null 2>&1
+fusermount -uz /mnt/${MERGEMOUNT} /mnt/${RCLONEMOUNT} > /dev/null 2>&1
 umount -f /mnt/${MERGEMOUNT} > /dev/null 2>&1
-fusermount -uz /mnt/${LOCAL} > /dev/null 2>&1
-umount -f /mnt/${LOCAL} > /dev/null 2>&1
+umount -f /mnt/${RCLONEMOUNT} > /dev/null 2>&1
+umount -f /mnt/${NFSLOCAL} > /dev/null 2>&1
+rm -r /mnt/${MERGEMOUNT} > /dev/null 2>&1
+rm -r /mnt/${RCLONEMOUNT} > /dev/null 2>&1
+rm -r /mnt/${NFSLOCAL} > /dev/null 2>&1
 echo Terminated
