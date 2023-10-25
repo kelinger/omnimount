@@ -65,10 +65,13 @@ echo Cleaning up leftovers
 fusermount -uz /mnt/${MERGEMOUNT} /mnt/${RCLONEMOUNT} > /dev/null 2>&1
 umount -f /mnt/${MERGEMOUNT} > /dev/null 2>&1
 umount -f /mnt/${RCLONEMOUNT} > /dev/null 2>&1
-umount -f /mnt/${NFSLOCAL} > /dev/null 2>&1
 rm -r /mnt/${MERGEMOUNT} > /dev/null 2>&1
 rm -r /mnt/${RCLONEMOUNT} > /dev/null 2>&1
-rm -r /mnt/${NFSLOCAL} > /dev/null 2>&1
+if [[ ${USENFS} = true ]]
+then
+	umount -f /mnt/${NFSLOCAL} > /dev/null 2>&1
+	rm -r /mnt/${NFSLOCAL} > /dev/null 2>&1
+fi
 mkdir -p /mnt/${MERGEMOUNT} /mnt/${LOCAL} /mnt/${UNSYNCED} /mnt/${UPLOADCACHE}/Downloads /logs
 chown -R ${USERID}:${GROUPID} /mnt /config
 echo Starting services
@@ -97,8 +100,11 @@ echo One or more mounts missing
 fusermount -uz /mnt/${MERGEMOUNT} /mnt/${RCLONEMOUNT} > /dev/null 2>&1
 umount -f /mnt/${MERGEMOUNT} > /dev/null 2>&1
 umount -f /mnt/${RCLONEMOUNT} > /dev/null 2>&1
-umount -f /mnt/${NFSLOCAL} > /dev/null 2>&1
 rm -r /mnt/${MERGEMOUNT} > /dev/null 2>&1
 rm -r /mnt/${RCLONEMOUNT} > /dev/null 2>&1
-rm -r /mnt/${NFSLOCAL} > /dev/null 2>&1
+if [[ ${USENFS} = true ]]
+then
+	umount -f /mnt/${NFSLOCAL} > /dev/null 2>&1
+	rm -r /mnt/${NFSLOCAL} > /dev/null 2>&1
+fi
 echo Terminated
