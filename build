@@ -1,4 +1,6 @@
 # Grab latest from https://github.com/trapexit/mergerfs
 # Rename it to mergerfs
+VER=$(cat version)
+echo Version ${VER}
 docker build -t kelinger/omnimount:latest .
-docker build -t kelinger/omnimount:1.51 .
+docker build -t kelinger/omnimount:${VER} .

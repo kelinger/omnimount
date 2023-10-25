@@ -21,6 +21,8 @@ mergerfs -v
 echo
 echo Starting vnstat
 vnstatd -d
+echo
+echo "OmniMount version:  " $(cat version)
 
 # Make sure we're only using the basename of the path for direcory creation
 

@@ -29,7 +29,7 @@ RUN curl https://rclone.org/install.sh | bash
 
 # Bring in scripts and binaries
 
-COPY omni-mounter omni-merger rstats startup turbosync mergerfs.deb /root/
+COPY omni-mounter omni-merger rstats startup turbosync mergerfs.deb version /root/
 WORKDIR /root
 
 # Install MergerFS

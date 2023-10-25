@@ -1,0 +1,3 @@
+VER=$(cat version)
+docker push kelinger/omnimount:latest
+docker push kelinger/omnimount:${VER}
