@@ -1,3 +1,11 @@
 VER=$(cat version)
+echo
+echo Pushing omnimount:latest
+echo
 docker push kelinger/omnimount:latest
+echo
+echo
+echo Pushing omnimount:${VER}
+echo
 docker push kelinger/omnimount:${VER}
+echo
