@@ -87,7 +87,7 @@ fi
 echo
 echo Startup complpete
 
-trap cleanup SIGKILL SIGTERM SIGHUP SIGINT EXIT
+trap cleanup SIGKILL SIGTERM SIGHUP SIGINT SIGQUIT SIGABRT SIGUSR1 SIGUSR2 EXIT
 
 while true; do
 	sleep 1
