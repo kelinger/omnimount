@@ -35,6 +35,7 @@ if [[ ! ${USENFS} = true ]]
 then
 	# Not using NFS
 	LOCAL=${RCLONEMOUNT}
+	unset NFSREMOTE NFSLOCAL
 else
 	LOCAL=${NFSLOCAL}
 fi
